@@ -15,6 +15,8 @@ import {
   Button,
 } from "@heroui/react";
 
+import React, { useState } from "react";
+
 export const SearchIcon = ({
   size = 24,
   strokeWidth = 1.5,
@@ -57,7 +59,11 @@ export const SearchIcon = ({
 };
 
 export default function NavbarComp() {
-  const loggedIn = localStorage.getItem("loggedIn");
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  if (localStorage.getItem("loggedIn") === "true") {
+    setLoggedIn(true);
+  }
 
   return (
     <Navbar isBordered>
