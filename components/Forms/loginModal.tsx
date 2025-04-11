@@ -10,8 +10,8 @@ import {
 import AuthForm from "./authform";
 import { useState } from "react";
 
-export default function LoginModal({ openModal, onChange }) {
-  const [register, setRegister] = useState(false);
+export default function LoginModal({ openModal, onChange, setLoggedIn }) {
+  const [isRegistered, setIsRegistered] = useState(false);
 
   return (
     <>
@@ -19,7 +19,7 @@ export default function LoginModal({ openModal, onChange }) {
         <ModalContent>
           {(onClose) => (
             <>
-              {!register ? (
+              {!isRegistered ? (
                 <ModalHeader className="flex flex-col gap-1">Login</ModalHeader>
               ) : (
                 <ModalHeader className="flex flex-col gap-1">Register</ModalHeader>
@@ -27,8 +27,10 @@ export default function LoginModal({ openModal, onChange }) {
               <ModalBody>
                 <AuthForm
                   onClose={onClose}
-                  register={register}
-                  setRegister={setRegister}
+                  isRegistered={isRegistered}
+                  setIsRegistered={setIsRegistered}
+                  closeModal={onClose}
+                  setLoggedIn={setLoggedIn}
                 />
               </ModalBody>
               <ModalFooter></ModalFooter>

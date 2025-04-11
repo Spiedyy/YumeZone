@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Form, Input, Button, addToast } from "@heroui/react";
 import { authClient } from "@/lib/auth-client";
 
-export default function AuthForm({ onClose, register, setRegister }) {
+export default function AuthForm({ onClose, isRegistered, setIsRegistered, closeModal, setLoggedIn }) {
   const [errors, setErrors] = useState({});
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -38,11 +38,13 @@ export default function AuthForm({ onClose, register, setRegister }) {
         },
         onSuccess: (ctx) => {
           console.log(ctx.data);
-          localStorage.setItem("session_token", ctx.data.token);
+          setLoggedIn(true);
+          closeModal();
           addToast({
             title: "Success",
             color: "success",
           });
+          setIsRegistered(true);
         },
         onError: (ctx) => {
           setErrors(ctx.error);
@@ -78,7 +80,7 @@ export default function AuthForm({ onClose, register, setRegister }) {
             name="password"
             placeholder="Enter your password"
           />
-          {register && (
+          {isRegistered && (
             <>
               <Input
                 label="Email"
@@ -98,7 +100,7 @@ export default function AuthForm({ onClose, register, setRegister }) {
             </>
           )}
           <div className="flex justify-center items-center w-full pt-12">
-            {!register ? (
+            {!isRegistered ? (
               <Button
                 onPress={() => {
                   handleClose();
@@ -125,12 +127,12 @@ export default function AuthForm({ onClose, register, setRegister }) {
         </Form>
 
         <div className="pt-2">
-          {!register ? (
+          {!isRegistered ? (
             <p className="text-xs">
               Dont have a acount? Sign up{" "}
               <button
                 onClick={() => {
-                  setRegister(true);
+                  setIsRegistered(true);
                 }}
                 className="underline"
               >
@@ -142,7 +144,7 @@ export default function AuthForm({ onClose, register, setRegister }) {
               Already have an account? Login{" "}
               <button
                 onClick={() => {
-                  setRegister(false);
+                  setIsRegistered(false);
                 }}
                 className="underline"
               >
@@ -154,14 +156,4 @@ export default function AuthForm({ onClose, register, setRegister }) {
       </div>
     </>
   );
-}
-
-// Fake server used in this example.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function callServer(data) {
-  return {
-    errors: {
-      username: "Sorry, this username is taken.",
-    },
-  };
 }

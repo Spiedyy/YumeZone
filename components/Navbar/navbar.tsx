@@ -14,9 +14,10 @@ import {
   Avatar,
   Button,
   useDisclosure,
+  addToast,
 } from "@heroui/react";
 
-import React, { use, useEffect, useState } from "react";
+import React, { useState } from "react";
 import LoginModal from "../Forms/loginModal";
 
 export const SearchIcon = ({
@@ -63,12 +64,6 @@ export const SearchIcon = ({
 export default function NavbarComp() {
   const [loggedIn, setLoggedIn] = useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
-  useEffect(() => {
-    if (localStorage.getItem("loggedIn") === "true") {
-      setLoggedIn(true);
-    }
-  }, []);
 
   return (
     <>
@@ -140,7 +135,20 @@ export default function NavbarComp() {
                   <p className="font-semibold">UserName</p>
                 </DropdownItem>
                 <DropdownItem key="settings">My Settings</DropdownItem>
-                <DropdownItem key="logout" color="danger">
+                <DropdownItem
+                  onPress={() => {
+                    localStorage.removeItem("session_token");
+                    setLoggedIn(false);
+                    addToast({
+                      title: "Logged Out",
+                      description: "You have been logged out.",
+                      timeout: 3000,
+                      color: "danger",
+                    });
+                  }}
+                  key="logout"
+                  color="danger"
+                >
                   Log Out
                 </DropdownItem>
               </DropdownMenu>
@@ -150,7 +158,7 @@ export default function NavbarComp() {
       </Navbar>
 
       <div>
-        <LoginModal openModal={isOpen} onChange={onOpenChange} />
+        <LoginModal openModal={isOpen} onChange={onOpenChange} setLoggedIn={setLoggedIn} />
       </div>
     </>
   );
