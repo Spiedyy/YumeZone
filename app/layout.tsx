@@ -45,7 +45,7 @@ export default function RootLayout({
             {/* navbar */}
             <NavbarComp />
             <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
-              {children}
+              <Providers>{children}</Providers>
             </main>
             {/* footer */}
           </div>
