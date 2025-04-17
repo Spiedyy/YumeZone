@@ -4,31 +4,29 @@ import React, { useState } from "react";
 import { Form, Input, Button, addToast } from "@heroui/react";
 import { authClient } from "@/lib/auth-client";
 
-export default function AuthForm({ onClose, isRegistered, setIsRegistered, closeModal, setLoggedIn }) {
+export default function AuthForm({
+  onClose,
+  isRegistered,
+  setIsRegistered,
+  closeModal,
+  setLoggedIn,
+}) {
   const [errors, setErrors] = useState({});
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function signUp(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const formData = Object.fromEntries(new FormData(e.currentTarget));
 
-    if (!formData.username) {
-      setErrors({ username: "Username is required" });
-
-      return;
-    }
-
     const email = formData.email as string;
     const password = formData.password as string;
     const name = formData.username as string;
-    const image = formData.profilePicture as string;
 
     const { data } = await authClient.signUp.email(
       {
         email,
         name,
         password,
-        callbackURL: "/",
       },
       {
         onRequest: (ctx) => {
@@ -37,7 +35,41 @@ export default function AuthForm({ onClose, isRegistered, setIsRegistered, close
           });
         },
         onSuccess: (ctx) => {
-          console.log(ctx.data);
+          setLoggedIn(true);
+          closeModal();
+          addToast({
+            title: "Success",
+            color: "success",
+          });
+          setIsRegistered(true);
+        },
+        onError: (ctx) => {
+          setErrors(ctx.error);
+        },
+      }
+    );
+  }
+
+  async function logIn(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    const formData = Object.fromEntries(new FormData(e.currentTarget));
+
+    const email = formData.email as string;
+    const password = formData.password as string;
+
+    const { data } = await authClient.signIn.email(
+      {
+        email,
+        password,
+      },
+      {
+        onRequest: (ctx) => {
+          addToast({
+            title: "Loading...",
+          });
+        },
+        onSuccess: (ctx) => {
           setLoggedIn(true);
           closeModal();
           addToast({
@@ -65,13 +97,14 @@ export default function AuthForm({ onClose, isRegistered, setIsRegistered, close
         <Form
           className="w-full max-w-xs gap-3"
           validationErrors={errors}
-          onSubmit={onSubmit}
+          onSubmit={isRegistered ? signUp : logIn}
         >
           <Input
-            label="Username"
+            label="Email"
+            type="email"
             labelPlacement="outside"
-            name="username"
-            placeholder="Enter your username"
+            name="email"
+            placeholder="Enter your email"
           />
           <Input
             label="Password"
@@ -83,11 +116,10 @@ export default function AuthForm({ onClose, isRegistered, setIsRegistered, close
           {isRegistered && (
             <>
               <Input
-                label="Email"
-                type="email"
+                label="Username"
                 labelPlacement="outside"
-                name="email"
-                placeholder="Enter your email"
+                name="username"
+                placeholder="Enter your username"
               />
               <Input
                 label="Profile Picture"
@@ -100,36 +132,25 @@ export default function AuthForm({ onClose, isRegistered, setIsRegistered, close
             </>
           )}
           <div className="flex justify-center items-center w-full pt-12">
-            {!isRegistered ? (
-              <Button
-                onPress={() => {
-                  handleClose();
-                }}
-                className="w-full"
-                type="submit"
-                variant="flat"
-              >
-                Login
-              </Button>
-            ) : (
-              <Button
-                onPress={() => {
-                  handleClose();
-                }}
-                className="w-full"
-                type="submit"
-                variant="flat"
-              >
-                Register
-              </Button>
-            )}
+            <Button
+              onPress={() => {
+                handleClose();
+              }}
+              className="w-full"
+              type="submit"
+              variant="flat"
+            >
+              {!isRegistered ? "Login" : "Register"}
+            </Button>
           </div>
         </Form>
 
         <div className="pt-2">
-          {!isRegistered ? (
-            <p className="text-xs">
-              Dont have a acount? Sign up{" "}
+          <p className="text-xs">
+            {!isRegistered
+              ? "Don't have an account?"
+              : "Already have an account?"}{" "}
+            {!isRegistered ? (
               <button
                 onClick={() => {
                   setIsRegistered(true);
@@ -138,10 +159,7 @@ export default function AuthForm({ onClose, isRegistered, setIsRegistered, close
               >
                 here
               </button>
-            </p>
-          ) : (
-            <p className="text-xs">
-              Already have an account? Login{" "}
+            ) : (
               <button
                 onClick={() => {
                   setIsRegistered(false);
@@ -150,8 +168,8 @@ export default function AuthForm({ onClose, isRegistered, setIsRegistered, close
               >
                 here
               </button>
-            </p>
-          )}
+            )}
+          </p>
         </div>
       </div>
     </>

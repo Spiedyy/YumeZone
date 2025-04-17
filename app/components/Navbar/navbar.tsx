@@ -17,9 +17,10 @@ import {
   addToast,
 } from "@heroui/react";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LoginModal from "../Forms/loginModal";
-
+import getSession from "@/app/server/getSession";
+import { authClient } from "@/lib/auth-client";
 export const SearchIcon = ({
   size = 24,
   strokeWidth = 1.5,
@@ -64,6 +65,21 @@ export const SearchIcon = ({
 export default function NavbarComp() {
   const [loggedIn, setLoggedIn] = useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [session, setSession] = useState();
+
+  useEffect(() => {
+    async function session() {
+      const session = await getSession();
+      setSession(session);
+    }
+
+    session();
+  }, [session]);
+
+  async function logOut() {
+    await authClient.signOut();
+  }
 
   return (
     <>
@@ -112,7 +128,7 @@ export default function NavbarComp() {
             type="search"
           />
 
-          {!loggedIn ? (
+          {!session ? (
             <Button onPress={onOpen} color="primary">
               Login
             </Button>
@@ -124,21 +140,20 @@ export default function NavbarComp() {
                   as="button"
                   className="transition-transform"
                   color="primary"
-                  name="Jason Hughes"
+                  name={session.user.name}
                   size="sm"
-                  src="https://pbs.twimg.com/media/FayoH9PXgAAlwje.png"
+                  src={session.user.image}
                 />
               </DropdownTrigger>
               <DropdownMenu aria-label="Profile Actions" variant="flat">
                 <DropdownItem key="profile" className="h-14 gap-2">
                   <p className="font-semibold">Signed in as</p>
-                  <p className="font-semibold">UserName</p>
+                  <p className="font-semibold">{session.user.name}</p>
                 </DropdownItem>
                 <DropdownItem key="settings">My Settings</DropdownItem>
                 <DropdownItem
                   onPress={() => {
-                    localStorage.removeItem("session_token");
-                    setLoggedIn(false);
+                    logOut();
                     addToast({
                       title: "Logged Out",
                       description: "You have been logged out.",
@@ -158,7 +173,13 @@ export default function NavbarComp() {
       </Navbar>
 
       <div>
-        <LoginModal openModal={isOpen} onChange={onOpenChange} setLoggedIn={setLoggedIn} />
+        <LoginModal
+          openModal={isOpen}
+          onChange={onOpenChange}
+          setLoggedIn={setLoggedIn}
+          isRegistered={isRegistered}
+          setIsRegistered={setIsRegistered}
+        />
       </div>
     </>
   );

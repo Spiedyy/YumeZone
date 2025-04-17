@@ -10,8 +10,7 @@ import {
 import AuthForm from "./authform";
 import { useState } from "react";
 
-export default function LoginModal({ openModal, onChange, setLoggedIn }) {
-  const [isRegistered, setIsRegistered] = useState(false);
+export default function LoginModal({ openModal, onChange, setLoggedIn, isRegistered, setIsRegistered, }) {
 
   return (
     <>
